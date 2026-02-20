@@ -8,7 +8,7 @@ export interface ProductsAll {
 
 export interface CreateProduct extends Omit<ProductsAll, 'id'> { };
 
-export type ProductsResponse = {
+export interface ProductsResponse {
     products: ProductsAll[];
     total: number;
     skip: number;

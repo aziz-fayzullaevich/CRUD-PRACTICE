@@ -1,15 +1,26 @@
-import { ActionIcon, Flex, Text } from "@mantine/core";
+import { ActionIcon, Button, Flex, Group, Pagination, Text, Title } from "@mantine/core";
 import { modals } from '@mantine/modals';
 import type { Column } from "../../../../shared/types/custom-table-types";
 import type { ProductsAll } from "../../types/products-types";
-import { useFetchProducts } from "../../queries/products-queries";
+import { useDeleteProduct, useFetchProducts } from "../../queries/products-queries";
 import { CustomTable } from "../../../../shared/ui/CustomTable";
-import { Edit, MinusCirlce } from 'iconsax-reactjs';
-import { DeleteProduct } from "../delete-product";
+import { AddCircle, Edit, MinusCirlce } from 'iconsax-reactjs';
+import { DeleteModal } from "../../../../shared/constants/delete-modal";
 
 export const ProductsList = () => {
     const { data, isLoading } = useFetchProducts();
     const products = data ? data.products : [];
+
+    const { mutateAsync: mutateAsyncDelete, isPending: isPendingDelete } = useDeleteProduct()
+
+    const deleteFn = (id: number) => {
+        modals.open({
+            title: <Text fw={700}>Удалить данные</Text>,
+            children: (
+                <DeleteModal onDelete={() => mutateAsyncDelete({ id })} />
+            )
+        })
+    };
 
     const columns: Column<ProductsAll>[] = [
         {
@@ -40,16 +51,13 @@ export const ProductsList = () => {
         {
             key: 'actiond',
             header: 'Действия',
-            render: () => <Flex justify="center" align="center" gap="sm">
+            render: (product) => <Flex justify="center" align="center" gap="sm">
                 <ActionIcon variant="subtle" size="lg">
                     <Edit color="#555555" />
                 </ActionIcon>
-                <ActionIcon variant="subtle" size="lg" onClick={() => {
-                    modals.open({
-                        title: 'Вы действительно хотите удалить?',
-                        children: <DeleteProduct />
-                    })
-                }}>
+                <ActionIcon variant="subtle" size="lg"
+                    onClick={() => deleteFn(product.id)}
+                    loading={isPendingDelete}>
                     <MinusCirlce color="#555555" />
                 </ActionIcon>
             </Flex>
@@ -58,11 +66,18 @@ export const ProductsList = () => {
 
     return (
         <div className="container">
-            <CustomTable
-                data={products}
-                columns={columns}
-                isLoading={isLoading}
-            />
+            <Group pt={'10px'} justify="center" gap={10}>
+                <Flex justify={'space-between'} style={{ width: '100%' }} >
+                    <Title size={'xl'}>Продукты</Title>
+                    <Button leftSection={<AddCircle />} size="md" variant="gradient">Создать</Button>
+                </Flex>
+                <CustomTable
+                    data={products}
+                    columns={columns}
+                    isLoading={isLoading}
+                />
+                <Pagination total={10} color="gray" size="sm" radius="xl" mt={10} />
+            </Group>
         </div>
     )
 };
