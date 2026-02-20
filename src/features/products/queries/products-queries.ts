@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { productsApi } from "../api/products-api"
-import type { ProductsResponse } from "../types/products-types"
+import type { ProductsAll, ProductsResponse } from "../types/products-types"
 import { toast } from 'react-toastify';
 
 export const useFetchProducts = () => {
@@ -15,13 +15,43 @@ export const useDeleteProduct = () => {
 
     return useMutation({
         mutationFn: productsApi.delete,
-        onSuccess: (data) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['products'] });
 
-            toast.success(data.message)
+            toast.success('Дата успешно удалён!')
         },
-        onError: (err) => {
-            toast.error(err.message)
+        onError: () => {
+            toast.error('Ошибка при удалении!')
         },
     });
+};
+
+export const useCreateProduct = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: any) => productsApi.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success('Продукт успешно создан!')
+        },
+        onError: () => {
+            toast.error('Ошибка при добавлении товара!')
+        }
+    });
+};
+
+export const useUpdateProduct = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number, payload: Partial<ProductsAll> }) => productsApi.update({ id, payload }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success('Данные обновлены!');
+        },
+        onError: () => {
+            toast.error('Ошибка при обнавлении!')
+        }
+    })
 };

@@ -1,5 +1,5 @@
 import { http } from "../../../shared/constants/api/api"
-import type { ProductsResponse } from "../types/products-types"
+import type { ProductsAll, ProductsResponse } from "../types/products-types"
 
 export const productsApi = {
     getAll: async () => {
@@ -7,8 +7,18 @@ export const productsApi = {
         return data;
     },
 
-    delete: async ({ id }: { id: number}) => {
+    delete: async ({ id }: { id: number }) => {
         const { data } = await http.delete(`/products/${id}`);
+        return data;
+    },
+
+    create: async ({ payload }: { payload: Omit<ProductsAll, 'id'> }) => {
+        const { data } = await http.post<ProductsAll>('/products/add', payload);
+        return data;
+    },
+
+    update: async ({ id, payload }: { id: number, payload: Partial<ProductsAll> }) => {
+        const { data } = await http.patch<ProductsAll>(`/products/${id}`, payload);
         return data;
     }
 };
